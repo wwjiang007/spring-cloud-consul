@@ -24,11 +24,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.consul.discovery.ConsulDiscoveryClient;
+import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ecwid.consul.v1.agent.model.NewService;
@@ -53,6 +54,9 @@ public class ConsulServiceRegistryTests {
 	@Autowired
 	private ConsulDiscoveryClient discoveryClient;
 
+	@Autowired
+	private ConsulDiscoveryProperties properties;
+
 	@LocalServerPort
 	private int port;
 
@@ -70,7 +74,7 @@ public class ConsulServiceRegistryTests {
 		service.setPort(port);
 		service.setTags(Collections.singletonList("mytag"));
 
-		ConsulRegistration registration = new ConsulRegistration(service);
+		ConsulRegistration registration = new ConsulRegistration(service, this.properties);
 		Throwable t = null;
 		try {
 			serviceRegistry.register(registration);

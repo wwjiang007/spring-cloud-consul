@@ -16,10 +16,14 @@
 
 package org.springframework.cloud.consul.serviceregistry;
 
+import java.util.List;
+
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationProperties;
@@ -50,8 +54,18 @@ public class ConsulAutoServiceRegistrationAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public ConsulAutoRegistration consulRegistration(ConsulDiscoveryProperties properties, ApplicationContext applicationContext,
-												 ServletContext servletContext, HeartbeatProperties heartbeatProperties) {
-		return ConsulAutoRegistration.registration(properties, applicationContext, servletContext, heartbeatProperties);
+			ObjectProvider<List<ConsulRegistrationCustomizer>> registrationCustomizers, HeartbeatProperties heartbeatProperties) {
+		return ConsulAutoRegistration.registration(properties, applicationContext, registrationCustomizers.getIfAvailable(), heartbeatProperties);
 	}
+
+	@Configuration
+	@ConditionalOnClass(ServletContext.class)
+	protected static class ConsulServletConfiguration {
+		@Bean
+		public ConsulRegistrationCustomizer servletConsulCustomizer(ObjectProvider<ServletContext> servletContext) {
+			return new ConsulServletRegistrationCustomizer(servletContext);
+		}
+	}
+
 
 }

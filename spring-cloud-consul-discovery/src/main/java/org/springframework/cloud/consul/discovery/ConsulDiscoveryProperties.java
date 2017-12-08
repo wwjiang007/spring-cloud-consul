@@ -37,6 +37,7 @@ import lombok.Setter;
  * @author Spencer Gibb
  * @author Donnabell Dmello
  * @author Venil Noronha
+ * @author Richard Kettelerij
  */
 @ConfigurationProperties("spring.cloud.consul.discovery")
 @Data
@@ -132,6 +133,12 @@ public class ConsulDiscoveryProperties {
 	 */
 	private Map<String, String> serverListQueryTags = new HashMap<>();
 
+	/**
+	 * Map of serviceId's -> datacenter to query for in server list.
+	 * This allows looking up services in another datacenters.
+	 */
+	private Map<String, String> datacenters = new HashMap<>();
+
 	/** Tag to query for in service list if one is not listed in serverListQueryTags. */
 	private String defaultQueryTag;
 
@@ -144,6 +151,9 @@ public class ConsulDiscoveryProperties {
 	/** Register as a service in consul. */
 	private boolean register = true;
 
+	/** Disable automatic de-registration of service in consul. */
+	private boolean deregister = true;
+
 	/** Register health check in consul. Useful during development of a service. */
 	private boolean registerHealthCheck = true;
 
@@ -152,6 +162,12 @@ public class ConsulDiscoveryProperties {
 	 * warnings (defaults to true).
 	 */
 	private boolean failFast = true;
+
+	/**
+	 * Skips certificate verification during service checks if true, otherwise
+	 * runs certificate verification.
+	 */
+	private Boolean healthCheckTlsSkipVerify;
 
 	@SuppressWarnings("unused")
 	private ConsulDiscoveryProperties() {}
@@ -163,7 +179,6 @@ public class ConsulDiscoveryProperties {
 	}
 
 	/**
-	 *
 	 * @param serviceId The service who's filtering tag is being looked up
 	 * @return The tag the given service id should be filtered by, or null.
      */
